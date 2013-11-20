@@ -1,0 +1,25 @@
+<html data-ng-app="Vatjob">
+<head>
+    <script data-require="angular.js@1.0.x" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js" data-semver="1.0.7"></script>
+    <script type="text/javascript" src='https://cdn.firebase.com/v0/firebase.js'></script>
+    <script type="text/javascript" src='https://cdn.firebase.com/v0/firebase-simple-login.js'></script>
+    <script type="text/javascript" src="https://cdn.firebase.com/libs/angularfire/0.3.0/angularfire.min.js"></script>
+    <script type="text/javascript" src='table/table.js'></script>
+    <script type="text/javascript" src='character/character.js'></script>
+    <script type="text/javascript" src='firebase/auth.js'></script>
+    <script type="text/javascript" src='app.js'></script>
+</head>
+<body>
+    <h4>Vatjob</h4>
+    <div data-ng-show="user">
+        Welcome {{ user.uid }}
+    </div>
+    <div data-vat-logout user="user"></div>
+
+    <div data-ng-view></div>
+
+    <!--<div data-ng-controller="newCharacterCtrl">-->
+        <!--<label>Name:</label><input data-ng-model="fire.character.profile.name">-->
+    <!--</div>-->
+</body>
+</html>

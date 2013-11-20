@@ -1,0 +1,134 @@
+{
+    "A": {
+        "metatype": {
+            "human": 9,
+            "elf": 8,
+            "dwarf": 7,
+            "ork": 7,
+            "troll": 5
+        },
+        "attributes": 24,
+        "magicOrResonance": [{
+                "type": "Magician or Mystic Adept",
+                "description": "Magic 6, two Rating 5 Magical skills, 10 spells",
+                "magic": 6
+            },
+            {
+                "type": "Technomancer",
+                "description": "Resonance 6, two Rating 5 Resonance skills, 5 complex forms",
+                "resonance": 6
+            }
+        ],
+        "skills": {
+            "skill": 46,
+            "group": 10
+        },
+        "resources": 450000
+    },
+    "B": {
+        "metatype": {
+            "human": 7,
+            "elf": 6,
+            "dwarf": 4,
+            "ork": 4,
+            "troll": 0
+        },
+        "attributes": 20,
+        "magicOrResonance": [{
+                "type": "Magician or Mystic Adept",
+                "description": "Magic 4, two Rating 4 Magical skills, 7 spells",
+                "magic": 4
+            },
+            {
+                "type": "Technomancer",
+                "description": "Resonance 4, two Rating 4 Resonance skills, 2 complex forms",
+                "resonance": 4
+            },
+            {
+                "type": "Adept",
+                "description": "Magic 6, one Rating 4 Active skill",
+                "magic": 6
+            },
+            {
+                "type": "Aspected Magician",
+                "description": "Magic 5, one Rating 4 Magical skill group",
+                "magic": 5
+            }
+        ],
+        "skills": {
+            "skill": 36,
+            "group": 5
+        },
+        "resources": 275000
+    },
+    "C": {
+        "metatype": {
+            "human": 5,
+            "elf": 3,
+            "dwarf": 1,
+            "ork": 0
+        },
+        "attributes": 16,
+            "magicOrResonance": [{
+                "type": "Magician or Mystic Adept",
+                "description": "Magic 3, 5 spells",
+                "magic": 3
+            },
+            {
+                "type": "Technomancer",
+                "description": "Resonance 3, 1 complex form",
+                "resonance": 3
+            },
+            {
+                "type": "Adept",
+                "description": "Magic 4, one Rating 2 Active skill",
+                "resonance": 4
+            },
+            {
+                "type": "Aspected Magician",
+                "description": "Magic 3, one Rating 2 Magical skill group",
+                "magic": 3
+            }
+        ],
+        "skills": {
+            "skill": 28,
+            "group": 2
+        },
+        "resources": 140000
+    },
+    "D": {
+        "metatype": {
+            "human": 3,
+            "elf": 0
+        },
+        "attributes": 14,
+        "magicOrResonance": [{
+                "type": "Adept",
+                "description": "Magic 2",
+                "magic": 2
+            },
+            {
+                "type": "Aspected Magician",
+                "description": "Magic 2",
+                "magic": 2
+            }
+        ],
+        "skills": {
+            "skill": 22,
+            "group": 0
+        },
+        "resources": 50000
+    },
+    "E": {
+        "metatype": {
+            "human": 1
+        },
+        "attributes": 12,
+        "magicOrResonance": [],
+        "skills": {
+            "skill": 18,
+            "group": 0
+        },
+        "resources": 6000
+    }
+}

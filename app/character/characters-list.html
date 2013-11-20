@@ -1,0 +1,10 @@
+<div data-ng-controller="charactersListCtrl">
+    <h3>List of characters</h3>
+    <ul>
+        <li data-ng-repeat="character in data.characters">
+            {{ character.name }}: {{ character.metatype }} {{ character.archetype }}
+            <a href="#/characters/{{ character.id }}">Edit</a>
+        </li>
+    </ul>
+    <button data-vat-new-character>New Character</button>
+</div>

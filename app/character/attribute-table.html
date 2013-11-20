@@ -1,0 +1,109 @@
+<p>
+    A character must spend all attribute points during
+    character creation. They may not spend attribute points
+    from the Attributes column to raise special attributes or
+    for any other purpose. Characters at character creation
+    may only have 1 Mental or Physical attribute at their
+    natural maximum limit; the special attributes of Magic,
+    Edge, and Resonance are not included in this limitation.
+</p>
+<table>
+    <thead>
+        <tr>
+            <td>Attributes</td>
+            <td>Racial Base/Limit</td>
+            <td>Points Spent</td>
+            <td>New Ratings</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th colspan="4">
+                Physical & Mental
+            </th>
+        </tr>
+        <tr>
+            <td>Body</td>
+            <td>{{ character | attributeBaseLimit:'body' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.body.points"></td>
+            <td>{{ character | attributeScore:'body' }}</td>
+        </tr>
+        <tr>
+            <td>Agility</td>
+            <td>{{ character | attributeBaseLimit:'agility' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.agility.points"></td>
+            <td>{{ character | attributeScore:'agility' }}</td>
+        </tr>
+        <tr>
+            <td>Reaction</td>
+            <td>{{ character | attributeBaseLimit:'reaction' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.reaction.points"></td>
+            <td>{{ character | attributeScore:'reaction' }}</td>
+        </tr>
+        <tr>
+            <td>Strength</td>
+            <td>{{ character | attributeBaseLimit:'strength' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.strength.points"></td>
+            <td>{{ character | attributeScore:'strength' }}</td>
+        </tr>
+        <tr>
+            <td>Charisma</td>
+            <td>{{ character | attributeBaseLimit:'charisma' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.charisma.points"></td>
+            <td>{{ character | attributeScore:'charisma' }}</td>
+        </tr>
+        <tr>
+            <td>Intuition</td>
+            <td>{{ character | attributeBaseLimit:'intuition' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.intuition.points"></td>
+            <td>{{ character | attributeScore:'intuition' }}</td>
+        </tr>
+        <tr>
+            <td>Logic</td>
+            <td>{{ character | attributeBaseLimit:'logic' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.logic.points"></td>
+            <td>{{ character | attributeScore:'logic' }}</td>
+        </tr>
+        <tr>
+            <td>Willpower</td>
+            <td>{{ character | attributeBaseLimit:'willpower' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.willpower.points"></td>
+            <td>{{ character | attributeScore:'willpower' }}</td>
+        </tr>
+        <tr>
+            <td>Essence</td>
+            <td>6</td>
+            <td>-</td>
+            <td>6</td>
+        </tr>
+        <tr>
+            <td>Total</td>
+            <td></td>
+            <td>{{ character | attributeTotalPoints }} / {{ character | attributePriorityPoints }} </td>
+            <td></td>
+        </tr>
+        <tr>
+            <th colspan="4">
+                Special Attributes
+            </th>
+        </tr>
+        <tr>
+            <td>Edge</td>
+            <td>{{ character | attributeBaseLimit:'edge' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.edge.points"></td>
+            <td>{{ character | attributeScore:'edge' }}</td>
+        </tr>
+        <tr>
+            <td>Magic/Resonance</td>
+            <td>{{ character | attributeBaseLimit:'magicOrResonance' }}</td>
+            <td><input type="number" data-ng-model="character.attribute.magicOrResonance.points"></td>
+            <td>{{ character | attributeScore:'magicOrResonance' }}</td>
+        </tr>
+        <tr>
+            <td>Total</td>
+            <td></td>
+            <td>{{ character | specialAttributeTotalPoints }} / {{ character | specialAttributePriorityPoints }}</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,13 @@
+<div data-ng-controller="charactersEditCtrl">
+    <a href="#/characters">Characters</a>
+    <h3>Edit Character</h3>
+    <ul>
+        <li><label>Name: </label><input data-ng-model="data.character.name"></li>
+        <li>
+            <label>Metatype: </label>
+            <select data-ng-model="data.character.metatype" data-ng-options="m for m in data.metatypes"></select>
+        </li>
+    </ul>
+    <div data-vat-character-priority="data.character.priority"></div>
+    <div data-vat-character-attributes="data.character"></div>
+</div>

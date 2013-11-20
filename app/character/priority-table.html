@@ -1,0 +1,56 @@
+<table>
+    <thead>
+    <tr>
+        <td>Priority</td>
+        <td colspan="2">Metatype</td>
+        <td colspan="2">Attributes</td>
+        <td colspan="2">Magic or Resonance</td>
+        <td colspan="2">Skills</td>
+        <td colspan="2">Resources</td>
+    </tr>
+    </thead>
+    <tbody>
+        <tr data-ng-repeat="(pkey,pvalue) in priorityTable">
+            <td>{{pkey}}</td>
+            <td>
+                <input type="radio" data-ng-model="priority.metatype" value="{{pkey}}">
+            </td>
+            <td>
+                <ul>
+                    <li data-ng-repeat="(key,value) in pvalue.metatype">
+                        {{key}} ({{value}})
+                    </li>
+                </ul>
+            </td>
+            <td>
+                <input type="radio" data-ng-model="priority.attributes" value="{{pkey}}">
+            </td>
+            <td>
+                {{ pvalue.attributes }}
+            </td>
+            <td>
+                <input type="radio" data-ng-model="priority.magicOrResonance" value="{{pkey}}">
+            </td>
+            <td>
+                <ul>
+                    <li data-ng-repeat="option in pvalue.magicOrResonance">
+                        <input data-ng-show="priority.magicOrResonance == pkey" type="radio" data-ng-model="priority.magicOrResonanceSelected" value="{{$index}}">
+                        <b>{{option.type}}:</b> {{option.description}}
+                    </li>
+                </ul>
+            </td>
+            <td>
+                <input type="radio" data-ng-model="priority.skills" value="{{pkey}}">
+            </td>
+            <td>
+                {{pvalue.skills.skill}}/{{pvalue.skills.group}}
+            </td>
+            <td>
+                <input type="radio" data-ng-model="priority.resources" value="{{pkey}}">
+            </td>
+            <td>
+                {{pvalue.resources}}¥
+            </td>
+        </tr>
+    </tbody>
+</table>

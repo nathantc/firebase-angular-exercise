@@ -1,0 +1,48 @@
+
+Character
+Path: [database url]/characters/$userid/$characterid
+{
+    concept: {
+        name: 'I-eal',
+        archetype: 'Technomancer',
+        metatype: 'Ork',
+    },
+    priorities: {
+        metaType: 'A',
+        attributes: 'B',
+        magicOrResonance: 'C',
+        skills: 'D',
+        resources: 'E'
+    },
+    attributes: {
+        body: {
+            points: 2,
+            karma: 0,
+        },
+        agility: {
+            points: 1,
+            karma: 0,
+        },
+        ....
+        edge: {
+            points: 1,
+            karma: 0,
+        },
+        resonance: {
+            points: 1,
+            karma: 0,
+        },
+    },
+    skills: {
+        active: {
+            computer: {
+                points: 3,
+                karma: 0
+            }
+        },
+        knowledge: {
+
+        }
+    }
+
+}
