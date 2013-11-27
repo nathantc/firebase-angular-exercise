@@ -1,27 +1,13 @@
 (function() {
-    var character = angular.module('Character', ['Table','firebase']);
+    var character = angular.module('Character', ['AuthModule', 'FbModule', 'Tables']);
 
-    character.factory('characterFbService', ['$rootScope', 'fbURL', 'angularFire', 'angularFireCollection', 'UuidService',
-            function($rootScope, fbURL, angularFire, angularFireCollection, UuidService) {
-
-        function getCharactersUrl() {
-            return fbURL + '/characters/' + $rootScope.user.uid;
-        }
+    character.factory('CharacterFbService', ['FbService', function(FbService) {
         return {
-            setCharacterScope: function(characterUid, $scope, scopeModelReference) {
-                angularFire(new Firebase(getCharactersUrl() + '/' + characterUid), $scope, scopeModelReference);
-            },
-
-            getCharacterList: function() {
-                return angularFireCollection(new Firebase(getCharactersUrl()));
-            },
-
-            createCharacter: function() {
-                var uuid = UuidService.guid();
+            newCharacter: function() {
                 var attributes = ['body', 'agility', 'reaction', 'strength', 'charisma', 'intuition', 'logic', 'willpower', 'essence', 'edge', 'magicOrResonance'];
                 var priorities = ['metatype', 'attributes', 'magicOrResonance', 'magicOrResonanceSelection', 'skills', 'resources'];
-                var newCharacter = {
-                    id: uuid,
+                var character = {
+                    uid: null,
                     name: 'New Character',
                     metatype: 'Human',
                     magicOrResonance: '',
@@ -29,18 +15,30 @@
                     attribute: {}
                 };
                 for (var i = 0; i < priorities.length; i++){
-                    newCharacter.priority[priorities[i]] = '';
+                    character.priority[priorities[i]] = '';
                 }
                 for (var i = 0; i < attributes.length; i++){
-                    newCharacter.attribute[attributes[i]] = { points: 0, karma: 0 };
+                    character.attribute[attributes[i]] = { points: 0, karma: 0 };
                 }
-                new Firebase(getCharactersUrl() + '/' + uuid).set(newCharacter);
-                return uuid;
+                return character;
+            },
+
+            getCharactersByUserUid: function(userUid) {
+                return FbService.getCollection('characters/' + userUid);
+            },
+
+            setUserCharacterToScopePath: function(userUid, characterUid, scope, scopePath) {
+                FbService.setModelToScopePath('characters/' + userUid + '/' + characterUid, scope, scopePath);
+            },
+
+            addUserCharacter: function(userUid, character) {
+                return FbService.addModelToPath(character, 'characters/' + userUid)
             }
         }
+
     }]);
 
-    character.factory('characterCalcService', ['table', function(table) {
+    character.factory('CharacterCalcService', ['TableMetatypeAttribute', function(tableMetatypeAttribute) {
 
         var attributeNames = ['body', 'agility', 'reaction', 'strength', 'charisma', 'intuition', 'logic', 'willpower'];
         var specialAttributeNames = ['edge', 'magicOrResonance'];
@@ -56,66 +54,67 @@
             return '';
         }
 
-        return {
-            baseAttributeScore: function(character, attributeName) {
-                return table.metatypeAttribute[character.metatype.toLowerCase()][attributeName].base;
-            },
+        var calc = {}
+        calc.baseAttributeScore = function(character, attributeName) {
+                return tableMetatypeAttribute[character.metatype.toLowerCase()][attributeName].base;
+            };
 
-            limitAttributeScore: function(character, attributeName) {
-                return table.metatypeAttribute[character.metatype.toLowerCase()][attributeName].limit;
-            },
+        calc.limitAttributeScore = function(character, attributeName) {
+                return tableMetatypeAttribute[character.metatype.toLowerCase()][attributeName].limit;
+            };
 
-            totalAttributePoints: function(character) {
+        calc.totalAttributePoints = function(character) {
                 return totalPoints(character, attributeNames);
-            },
+            };
 
-            totalSpecialAttributePoints: function(character) {
+        calc.totalSpecialAttributePoints = function(character) {
                 return totalPoints(character, specialAttributeNames);
-            },
+            };
 
-            attributeScore: function(character, attributeName) {
-                if (isDefined(character)) {
-                    var meta = table.metatypeAttribute[character.metatype.toLowerCase()][attributeName];
-                    var attr = character.attribute[attributeName];
-                    return meta.base + attr.points;
-                }
-                return '';
-            }
+        calc.attributeScore = function(character, attributeName) {
+                var meta = calc.baseAttributeScore(character, attributeName);
+                var attr = character.attribute[attributeName];
+                return meta + attr.points;
+            };
 
-        }
+        return calc;
     }]);
 
-    character.factory('priorityService', ['table', function(table) {
+    character.factory('PriorityService', ['TablePriority', function(TablePriority) {
         return {
             attributePriorityPoints: function(character) {
                 if (isDefined(character) &&
                     isDefined(character.priority.attributes) &&
-                    isDefined(table.priority[character.priority.attributes])) {
-                    return table.priority[character.priority.attributes].attributes;
+                    isDefined(TablePriority[character.priority.attributes])) {
+                    return TablePriority[character.priority.attributes].attributes;
                 }
                 return 0;
             },
 
             specialAttributePriorityPoints: function(character) {
-                return table.priority[character.priority.metatype].metatype[character.metatype.toLowerCase()];
+                return TablePriority[character.priority.metatype].metatype[character.metatype.toLowerCase()];
             }
         }
     }]);
 
-    character.controller('charactersListCtrl', ['$scope', 'characterFbService', function($scope, characterFbService) {
+    character.controller('CharactersListCtrl', ['$scope', 'AuthService', 'CharacterFbService',
+        function($scope, authService, characterFbService)
+    {
         $scope.data = {
-            characters: characterFbService.getCharacterList()
+            characters: characterFbService.getCharactersByUserUid(authService.currentUser().uid)
         }
     }]);
 
-    character.controller('charactersEditCtrl', ['$scope', '$routeParams', 'characterFbService', function($scope, $routeParams, characterFbService) {
+    character.controller('CharactersEditCtrl', ['$scope', '$routeParams', 'AuthService', 'CharacterFbService',
+        function($scope, $routeParams, authService, characterFbService)
+    {
         $scope.data = {
             metatypes: ['Human', 'Elf', 'Dwarf', 'Ork', 'Troll']
         }
-        characterFbService.setCharacterScope($routeParams.characterUid, $scope, 'data.character');
+        characterFbService.setUserCharacterToScopePath(authService.currentUser().uid, $routeParams.characterUid, $scope, 'data.character');
     }]);
 
-    character.filter('attributeBaseLimit', ['characterCalcService', function(characterCalcService) {
+    character.filter('attributeBaseLimit', ['CharacterCalcService', function(characterCalcService) {
         return function(character, attribute) {
             if (isDefined(character)) {
                 return characterCalcService.baseAttributeScore(character, attribute) + '/' +
@@ -125,23 +124,23 @@
         }
     }]);
 
-    character.filter('attributeScore', ['characterCalcService', function(characterCalcService) {
+    character.filter('attributeScore', ['CharacterCalcService', function(characterCalcService) {
         return characterCalcService.attributeScore;
     }]);
 
-    character.filter('attributeTotalPoints', ['characterCalcService', function(characterCalcService) {
+    character.filter('attributeTotalPoints', ['CharacterCalcService', function(characterCalcService) {
         return characterCalcService.totalAttributePoints;
     }]);
 
-    character.filter('attributePriorityPoints', ['priorityService', function(priorityService) {
+    character.filter('attributePriorityPoints', ['PriorityService', function(priorityService) {
         return priorityService.attributePriorityPoints;
     }]);
 
-    character.filter('specialAttributeTotalPoints', ['characterCalcService', function(characterCalcService) {
+    character.filter('specialAttributeTotalPoints', ['CharacterCalcService', function(characterCalcService) {
         return characterCalcService.totalSpecialAttributePoints;
     }]);
 
-    character.filter('specialAttributePriorityPoints', ['priorityService', function(priorityService) {
+    character.filter('specialAttributePriorityPoints', ['PriorityService', function(priorityService) {
         return priorityService.specialAttributePriorityPoints;
     }]);
 
@@ -157,13 +156,14 @@
     character.directive('vatNewCharacter', function() {
         return {
             scope: {},
-            controller: ['$scope', '$location', 'characterFbService', function($scope, $location, characterFbService) {
+            controller: ['$scope', '$location', 'AuthService', 'CharacterFbService', function($scope, $location, authService, characterFbService) {
                 $scope.newCharacter = function() {
-                    $location.path('characters/' + characterFbService.createCharacter());
+                    var character = characterFbService.newCharacter();
+                    $location.path('characters/' + characterFbService.addUserCharacter(authService.currentUser().uid, character));
                 }
             }],
             link: function($scope, element) {
-                element.bind("click", function(e) {
+                element.bind("click", function() {
                     $scope.newCharacter();
                 })
             }
@@ -176,8 +176,8 @@
             scope: {
                 priority: '=vatCharacterPriority'
             },
-            controller: ['$scope', 'table', function($scope, table) {
-                $scope.priorityTable = table.priority;
+            controller: ['$scope', 'TablePriority', function($scope, TablePriority) {
+                $scope.priorityTable = TablePriority;
             }]
         }
     });

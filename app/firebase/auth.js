@@ -1,27 +1,48 @@
+"use strict";
+
 (function () {
-    var auth = angular.module('Auth', ['firebase']);
+    var auth = angular.module('AuthModule', ['FbModule']);
 
-    auth.factory('authService', ['$rootScope', '$location', 'angularFireAuth', 'fbURL', function($rootScope, $location, angularFireAuth, fbURL) {
-        return function() {
-            angularFireAuth.initialize(new Firebase(fbURL), {
-                scope: $rootScope,
-                name: 'user'
-            });
+    auth.factory('AuthService', ['$rootScope', '$location', 'fbURL', 'angularFireAuth', function($rootScope, $location, fbURL, angularFireAuth) {
+        var auth = {};
+        auth.initialize = function(targetRoute) {
+                $rootScope.$on('angularFireAuth:logout', this._onLogout);
+                $rootScope.$on('angularFireAuth:login', this._onLogin);
+                $rootScope.$on('$routeChangeStart', this._onRouteChangeStart);
 
-//            $rootScope.$on('angularFireAuth:login', _login);
-//            $rootScope.$on('angularFireAuth:logout', _logout);
-//
-//            function _login(evt, user) {
-//                $location.path('/');
-//            }
-//
-//            function _logout(evt) {
-//                $location.path('/login');
-//            }
-        }
+                $rootScope.auth = { targetRoute: targetRoute || '/' };
+                angularFireAuth.initialize(new Firebase(fbURL), {
+                        scope: $rootScope.auth,
+                        name: 'user'
+                    }
+                );
+            };
+
+        auth.isAuthenticated = function() {
+                return isNotNullOrUndefined($rootScope.auth.user);
+            };
+
+        auth.currentUser = function() {
+                return $rootScope.auth.user;
+            };
+
+        auth._onRouteChangeStart = function() {
+                if (!auth.isAuthenticated()) {
+                    $location.path('/login');
+                }
+            };
+
+        auth._onLogin = function() {
+                $location.path($rootScope.auth.targetRoute);
+            };
+
+        auth._onLogout = function() {
+                $location.path('/login');
+            };
+        return auth;
     }]);
 
-    auth.controller('loginCtrl', ['$scope', 'angularFireAuth',
+    auth.controller('LoginCtrl', ['$scope', 'angularFireAuth',
         function($scope, angularFireAuth) {
             $scope.options = [
                     { name: 'Facebook', key: 'facebook' },
@@ -38,9 +59,6 @@
 
     auth.directive('vatLogout', function() {
         return {
-            scope: {
-                user: '='
-            },
             controller: ['$scope', 'angularFireAuth', function($scope, angularFireAuth) {
                 $scope.logout = function() {
                     angularFireAuth.logout();
