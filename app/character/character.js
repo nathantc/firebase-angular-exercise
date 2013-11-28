@@ -10,6 +10,7 @@
                     uid: null,
                     name: 'New Character',
                     metatype: 'Human',
+                    gender: 'Male',
                     magicOrResonance: '',
                     priority: {},
                     attribute: {}
@@ -83,12 +84,7 @@
     character.factory('PriorityService', ['TablePriority', function(TablePriority) {
         return {
             attributePriorityPoints: function(character) {
-                if (isDefined(character) &&
-                    isDefined(character.priority.attributes) &&
-                    isDefined(TablePriority[character.priority.attributes])) {
-                    return TablePriority[character.priority.attributes].attributes;
-                }
-                return 0;
+                return TablePriority[character.priority.attributes].attributes;
             },
 
             specialAttributePriorityPoints: function(character) {
@@ -105,12 +101,18 @@
         }
     }]);
 
-    character.controller('CharactersEditCtrl', ['$scope', '$routeParams', 'AuthService', 'CharacterFbService',
-        function($scope, $routeParams, authService, characterFbService)
+    character.controller('CharactersEditCtrl', ['$scope', '$routeParams', '$location', 'AuthService', 'CharacterFbService',
+        function($scope, $routeParams, $location, authService, characterFbService)
     {
         $scope.data = {
-            metatypes: ['Human', 'Elf', 'Dwarf', 'Ork', 'Troll']
+            metatypes: ['Human', 'Elf', 'Dwarf', 'Ork', 'Troll'],
+            tab: $location.search().tab || 'metatype',
+            setTab: function(name) {
+                $scope.data.tab = name;
+                $location.search('tab', name);
+            }
         }
+
         characterFbService.setUserCharacterToScopePath(authService.currentUser().uid, $routeParams.characterUid, $scope, 'data.character');
     }]);
 
@@ -125,7 +127,12 @@
     }]);
 
     character.filter('attributeScore', ['CharacterCalcService', function(characterCalcService) {
-        return characterCalcService.attributeScore;
+        return function(character, attributeName) {
+            if (validObjectPathName(character, 'metatype')){
+                return characterCalcService.attributeScore(character, attributeName);
+            }
+            return '';
+        }
     }]);
 
     character.filter('attributeTotalPoints', ['CharacterCalcService', function(characterCalcService) {
@@ -133,7 +140,12 @@
     }]);
 
     character.filter('attributePriorityPoints', ['PriorityService', function(priorityService) {
-        return priorityService.attributePriorityPoints;
+        return function(character) {
+            if (validObjectPathName(character, 'priority.attributes')) {
+                return priorityService.attributePriorityPoints(character);
+            }
+            return '';
+        }
     }]);
 
     character.filter('specialAttributeTotalPoints', ['CharacterCalcService', function(characterCalcService) {
@@ -141,7 +153,12 @@
     }]);
 
     character.filter('specialAttributePriorityPoints', ['PriorityService', function(priorityService) {
-        return priorityService.specialAttributePriorityPoints;
+        return function(character) {
+            if (validObjectPathName(character, 'priority.metatype')){
+                return priorityService.specialAttributePriorityPoints(character);
+            }
+            return '';
+        }
     }]);
 
     character.directive('vatCharacterAttributes', function() {

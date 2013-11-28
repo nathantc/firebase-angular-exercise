@@ -13,10 +13,13 @@
 </head>
 <body>
     <h4>Vatjob</h4>
-    <div data-ng-show="user">
-        Welcome {{ user.uid }}
+    <div data-ng-show="auth.user">
+        Welcome {{ auth.user.displayName }}
     </div>
-    <div data-vat-logout user="user"></div>
+    <div data-vat-logout></div>
+    <ul>
+        <li><a href="#/characters">Characters</a></li>
+    </ul>
 
     <div data-ng-view></div>
 
