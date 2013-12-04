@@ -47,9 +47,11 @@ describe('character.js - Character Module', function() {
                 uid: null,
                 name: 'New Character',
                 metatype: 'Human',
+                gender: 'Male',
                 magicOrResonance: '',
                 priority: {},
-                attribute: {}
+                attribute: {},
+                quality: {}
                 };
             for (var i = 0; i < priorities.length; i++){
                 newCharacter.priority[priorities[i]] = '';
@@ -63,12 +65,13 @@ describe('character.js - Character Module', function() {
 
     describe('CharacterCalcService', function() {
 
-        var _characterCalcService, character;
+        var _CharacterCalcService, _CharacterFbService, character;
 
         beforeEach(function() {
             angular.mock.module('Character');
-            inject(function(CharacterCalcService, NameArrays) {
-                _characterCalcService = CharacterCalcService;
+            inject(function(CharacterCalcService, NameArrays, CharacterFbService) {
+                _CharacterCalcService = CharacterCalcService;
+                _CharacterFbService = CharacterFbService;
 
                 character = { metatype: 'Human', attribute: {} };
                 for (var i=0; i<NameArrays.standardAttributes.length; i++) {
@@ -81,47 +84,72 @@ describe('character.js - Character Module', function() {
 
         it('returns base value for human metatype attribute', function() {
             character.metatype = 'human'
-            expect(_characterCalcService.baseAttributeScore(character, 'strength')).toEqual(1);
-            expect(_characterCalcService.baseAttributeScore(character, 'edge')).toEqual(2);
-            expect(_characterCalcService.baseAttributeScore(character, 'magicOrResonance')).toEqual(0);
+            expect(_CharacterCalcService.baseAttributeScore(character, 'strength')).toEqual(1);
+            expect(_CharacterCalcService.baseAttributeScore(character, 'edge')).toEqual(2);
+            expect(_CharacterCalcService.baseAttributeScore(character, 'magicOrResonance')).toEqual(0);
         })
 
         it('returns base value for troll metatype attribute', function() {
             character.metatype = 'troll'
-            expect(_characterCalcService.baseAttributeScore(character, 'strength')).toEqual(5);
-            expect(_characterCalcService.baseAttributeScore(character, 'edge')).toEqual(1);
-            expect(_characterCalcService.baseAttributeScore(character, 'magicOrResonance')).toEqual(0);
+            expect(_CharacterCalcService.baseAttributeScore(character, 'strength')).toEqual(5);
+            expect(_CharacterCalcService.baseAttributeScore(character, 'edge')).toEqual(1);
+            expect(_CharacterCalcService.baseAttributeScore(character, 'magicOrResonance')).toEqual(0);
         })
 
         it('returns limit value for dwarf metatype attribute', function() {
             character.metatype = 'dwarf'
-            expect(_characterCalcService.limitAttributeScore(character, 'body')).toEqual(8);
-            expect(_characterCalcService.limitAttributeScore(character, 'strength')).toEqual(8);
-            expect(_characterCalcService.limitAttributeScore(character, 'willpower')).toEqual(7);
+            expect(_CharacterCalcService.limitAttributeScore(character, 'body')).toEqual(8);
+            expect(_CharacterCalcService.limitAttributeScore(character, 'strength')).toEqual(8);
+            expect(_CharacterCalcService.limitAttributeScore(character, 'willpower')).toEqual(7);
         })
 
         it('returns elf value for troll metatype attribute', function() {
             character.metatype = 'elf'
-            expect(_characterCalcService.limitAttributeScore(character, 'agility')).toEqual(7);
-            expect(_characterCalcService.limitAttributeScore(character, 'reaction')).toEqual(6);
-            expect(_characterCalcService.limitAttributeScore(character, 'intuition')).toEqual(6);
+            expect(_CharacterCalcService.limitAttributeScore(character, 'agility')).toEqual(7);
+            expect(_CharacterCalcService.limitAttributeScore(character, 'reaction')).toEqual(6);
+            expect(_CharacterCalcService.limitAttributeScore(character, 'intuition')).toEqual(6);
         })
 
         it('totals the allocated attribute points', function() {
-            expect(_characterCalcService.totalAttributePoints(character)).toBe(28);
+            expect(_CharacterCalcService.totalAttributePoints(character)).toBe(28);
         })
 
         it('totals the allocated special attribute points', function() {
-            expect(_characterCalcService.totalSpecialAttributePoints(character)).toBe(7);
+            expect(_CharacterCalcService.totalSpecialAttributePoints(character)).toBe(7);
         })
 
         it('retrieves the attribute score by name', function() {
             character.metatype = 'Human'
             character.attribute.strength.points = 5
-            expect(_characterCalcService.attributeScore(character, 'strength')).toBe(6)
+            expect(_CharacterCalcService.attributeScore(character, 'strength')).toBe(6)
             character.metatype = 'Dwarf'
             character.attribute.strength.points = 6
-            expect(_characterCalcService.attributeScore(character, 'strength')).toBe(9)
+            expect(_CharacterCalcService.attributeScore(character, 'strength')).toBe(9)
+        })
+
+        describe('character karma', function() {
+
+            var character;
+
+            beforeEach(function() {
+                character = _CharacterFbService.newCharacter();
+            })
+
+            it('new characters have 25 karma', function() {
+                expect(_CharacterCalcService.karma(character)).toBe(25);
+            });
+
+            it('reduces karma by the total positive qualities', function() {
+                character.quality.ambidextrous = { karma: 5 };
+                character.quality.guts = { karma: 3 };
+                expect(_CharacterCalcService.karma(character)).toBe(17);
+            })
+
+            it('add karma by the total negative qualities', function() {
+                character.quality.adiction = { karma: -5 };
+                character.quality.allergy = { karma: -10 };
+                expect(_CharacterCalcService.karma(character)).toBe(40);
+            })
         })
 
     });
@@ -308,5 +336,38 @@ describe('character.js - Character Module', function() {
             expect(element.scope().priority).toBeDefined();
             expect(element.scope().priority[0]).toEqual('A');
         })
+    })
+
+    describe('directive vatCharacterQualities', function() {
+        var element, _controller, _scope, _Qualities, _CharacterFbService;
+
+        beforeEach(angular.mock.module('Character'));
+        beforeEach(inject(function($compile, $rootScope, $httpBackend, Qualities) {
+            _Qualities = Qualities;
+            _scope = $rootScope.$new();
+
+            $httpBackend.whenGET('character/qualities.html').respond('<table></table>')
+            $rootScope.data = { character: { name: 'steve' } }
+            element = angular.element('<div data-vat-character-qualities="data.character"></div>')
+
+            $compile(element)($rootScope)
+            _controller = element.controller('vatCharacterQualities');
+//            $rootScope.$digest()
+            $httpBackend.flush()
+        }));
+
+        it('should load template', function() {
+            expect(element.find('table').length).toBeGreaterThan(0);
+        })
+
+        it('should set isolate scope', function() {
+            expect(element.scope().character).toBeDefined();
+            expect(element.scope().character.name).toEqual('steve');
+        })
+
+        it('should set Qualities to scope', function() {
+            expect(element.scope().qualities).toBe(_Qualities);
+        })
+
     })
 });

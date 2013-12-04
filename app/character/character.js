@@ -13,7 +13,8 @@
                     gender: 'Male',
                     magicOrResonance: '',
                     priority: {},
-                    attribute: {}
+                    attribute: {},
+                    quality: {}
                 };
                 for (var i = 0; i < priorities.length; i++){
                     character.priority[priorities[i]] = '';
@@ -78,6 +79,14 @@
                 return meta + attr.points;
             };
 
+        calc.karma = function(character) {
+            var karma = 25;
+            for (var quality in character.quality) {
+                karma = karma - character.quality[quality].karma;
+            }
+            return karma;
+        }
+
         return calc;
     }]);
 
@@ -106,10 +115,10 @@
     {
         $scope.data = {
             metatypes: ['Human', 'Elf', 'Dwarf', 'Ork', 'Troll'],
-            tab: $location.search().tab || 'metatype',
+            tab: 'metatype',
             setTab: function(name) {
                 $scope.data.tab = name;
-                $location.search('tab', name);
+               // $location.search('tab', name);
             }
         }
 
@@ -161,6 +170,33 @@
         }
     }]);
 
+    character.filter('hasQuality', function() {
+        return function(character, name) {
+            return validObjectPathName(character, 'quality.' + name);
+        }
+    });
+
+    character.filter('karma', ['CharacterCalcService', function(CharacterCalcService) {
+        return function(character) {
+            if (validObjectPathName(character, 'quality')){
+                return CharacterCalcService.karma(character);
+            }
+            return '';
+        }
+    }]);
+
+    character.filter('positiveQuality', function() {
+        return function(quality, value) {
+            var result = {}
+            for (var key in quality) {
+                if (quality[key].karma * value >= 0) {
+                    result[key] = quality[key];
+                }
+            }
+            return result;
+        }
+    })
+
     character.directive('vatCharacterAttributes', function() {
         return {
             templateUrl: 'character/attribute-table.html',
@@ -198,5 +234,37 @@
             }]
         }
     });
+
+    character.controller('CharacterQualityCtrl', ['$scope', 'Qualities', function($scope, Qualities) {
+        $scope.qualities = Qualities;
+        $scope.qualityType = 1;
+
+        $scope.addQuality = function(key) {
+            $scope.character.quality = $scope.character.quality || {};
+            $scope.character.quality[key] = {
+                name: Qualities[key].name,
+                karma: Qualities[key].karma
+            }
+        }
+
+        $scope.removeQuality = function(key) {
+            delete $scope.character.quality[key];
+        }
+
+        $scope.characterHasQuality = function(key) {
+            return validObjectPathName($scope.character, 'quality.' + key);
+        }
+
+    }])
+
+    character.directive('vatCharacterQualities', function() {
+        return {
+            templateUrl: 'character/qualities.html',
+            scope: {
+                character: '=vatCharacterQualities'
+            },
+            controller: 'CharacterQualityCtrl'
+        }
+    })
 
 })();

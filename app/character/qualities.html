@@ -1,0 +1,44 @@
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Quality</th>
+            <th>Karma</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr data-ng-repeat="(qkey, qvalue) in character.quality">
+            <td>
+                <button data-ng-click="removeQuality(qkey)">-</button>
+            </td>
+            <td>{{ qvalue.name }}</td>
+            <td>{{ qvalue.karma }}</td>
+        </tr>
+    </tbody>
+</table>
+<select data-ng-model="qualityType">
+    <option value="1">Positive</option>
+    <option value="-1">Negative</option>
+</select>
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Quality</th>
+            <th>Karma</th>
+            <th>Max Rating</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr data-ng-repeat="(qkey, qvalue) in qualities | positiveQuality:qualityType">
+            <td>
+                <button data-ng-click="addQuality(qkey)"
+                        data-ng-show="!characterHasQuality(qkey)">+</button>
+            </td>
+            <td>{{ qvalue.name }}</td>
+            <td>{{ qvalue.karma }}</td>
+            <td>{{ qvalue.maxRating }}</td>
+            <td>{{ qvalue.short }}</td>
+        </tr>
+    </tbody>
+</table>
