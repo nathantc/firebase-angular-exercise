@@ -1,9 +1,9 @@
-<div data-ng-controller="CharactersListCtrl">
+<div data-ng-controller="CharactersListController">
     <h3>List of characters</h3>
     <ul>
         <li data-ng-repeat="character in data.characters">
             {{ character.name }}: {{ character.metatype }} {{ character.archetype }}
-            <a href="#/characters/{{ character.id }}">Edit</a>
+            <a href="#/characters/{{ character.uid }}">Edit</a>
         </li>
     </ul>
     <button data-vat-new-character>New Character</button>

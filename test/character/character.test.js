@@ -2,12 +2,13 @@
 
 describe('character.js - Character Module', function() {
 
+    beforeEach(angular.mock.module('Character'));
+
     describe('CharacterFbService', function() {
 
         var _fbService, _characterFbService;
 
         beforeEach(function() {
-            angular.mock.module('Character');
             inject(function(CharacterFbService, FbService) {
                 _characterFbService = CharacterFbService;
                 _fbService = FbService;
@@ -68,7 +69,6 @@ describe('character.js - Character Module', function() {
         var _CharacterCalcService, _CharacterFbService, character;
 
         beforeEach(function() {
-            angular.mock.module('Character');
             inject(function(CharacterCalcService, NameArrays, CharacterFbService) {
                 _CharacterCalcService = CharacterCalcService;
                 _CharacterFbService = CharacterFbService;
@@ -159,7 +159,6 @@ describe('character.js - Character Module', function() {
         var _PriorityService, character;
 
         beforeEach(function() {
-            angular.mock.module('Character');
             inject(function(PriorityService, NameArrays) {
                 _PriorityService = PriorityService;
                 character = { priority: { attributes: ''} };
@@ -180,13 +179,12 @@ describe('character.js - Character Module', function() {
         })
     })
 
-    describe('CharacterListCtrl', function() {
+    describe('CharacterListController', function() {
 
         var _scope, _authService, _characterFbService,
             characterList = [{ name:'joe' }];
 
         beforeEach(function() {
-            angular.mock.module('Character');
             inject(function($rootScope, $controller, AuthService, CharacterFbService)
             {
                 _authService = AuthService;
@@ -196,7 +194,7 @@ describe('character.js - Character Module', function() {
                 spyOn(_characterFbService, 'getCharactersByUserUid').andReturn(characterList);
 
                 _scope = $rootScope.$new();
-                $controller('CharactersListCtrl', { $scope:_scope });
+                $controller('CharactersListController', { $scope:_scope });
             });
         })
 
@@ -213,13 +211,12 @@ describe('character.js - Character Module', function() {
         })
     })
 
-    describe('CharacterEditCtrl', function() {
+    describe('CharacterEditController', function() {
 
         var _scope, _authService, _characterFbService, _routeParams,
             character = { name:'bob' };
 
         beforeEach(function() {
-            angular.mock.module('Character');
             inject(function($rootScope, $controller, AuthService, CharacterFbService)
             {
                 _authService = AuthService;
@@ -230,7 +227,7 @@ describe('character.js - Character Module', function() {
                 spyOn(_characterFbService, 'setUserCharacterToScopePath').andReturn(character);
 
                 _scope = $rootScope.$new();
-                $controller('CharactersEditCtrl', { $scope:_scope, $routeParams: _routeParams });
+                $controller('CharactersEditController', { $scope:_scope, $routeParams: _routeParams });
             });
         })
 
@@ -252,7 +249,6 @@ describe('character.js - Character Module', function() {
 
         var element;
 
-        beforeEach(angular.mock.module('Character'))
         beforeEach(inject(function($compile, $rootScope, $httpBackend) {
 
             $httpBackend.whenGET('character/attribute-table.html').respond('<table></table>')
@@ -275,8 +271,6 @@ describe('character.js - Character Module', function() {
     })
 
     describe('directive vatNewCharacter', function() {
-
-        beforeEach(angular.mock.module('Character'));
 
         var element, linked, _location;
         beforeEach(inject(function($compile, $rootScope,
@@ -316,7 +310,6 @@ describe('character.js - Character Module', function() {
 
         var element;
 
-        beforeEach(angular.mock.module('Character'))
         beforeEach(inject(function($compile, $rootScope, $httpBackend) {
 
             $httpBackend.whenGET('character/priority-table.html').respond('<table></table>')
@@ -339,20 +332,16 @@ describe('character.js - Character Module', function() {
     })
 
     describe('directive vatCharacterQualities', function() {
-        var element, _controller, _scope, _Qualities, _CharacterFbService;
+        var element, _Qualities;
 
-        beforeEach(angular.mock.module('Character'));
         beforeEach(inject(function($compile, $rootScope, $httpBackend, Qualities) {
             _Qualities = Qualities;
-            _scope = $rootScope.$new();
 
             $httpBackend.whenGET('character/qualities.html').respond('<table></table>')
             $rootScope.data = { character: { name: 'steve' } }
             element = angular.element('<div data-vat-character-qualities="data.character"></div>')
 
             $compile(element)($rootScope)
-            _controller = element.controller('vatCharacterQualities');
-//            $rootScope.$digest()
             $httpBackend.flush()
         }));
 
@@ -369,5 +358,159 @@ describe('character.js - Character Module', function() {
             expect(element.scope().qualities).toBe(_Qualities);
         })
 
+        describe('controller functions', function() {
+
+            it('initializes qualityType to positive', function() {
+                expect(element.scope().qualityType).toBe('positive');
+            })
+
+            describe('addQuality', function() {
+
+                it('adds quality by key name', function() {
+                    element.scope().addQuality('guts');
+                    expect(element.scope().character.quality.guts).toBeDefined();
+                    expect(element.scope().character.quality.guts.karma).toBe(10);
+                    expect(element.scope().character.quality.guts.name).toBe("Guts");
+                })
+
+                it('initializes rating to 1', function() {
+                    element.scope().addQuality('aptitude');
+                    expect(element.scope().character.quality.aptitude.rating).toBe(1);
+                })
+
+                it('adds single rating quality', function() {
+                    element.scope().addQuality('aptitude');
+                    expect(element.scope().character.quality.aptitude.maxRating).toBeUndefined();
+                })
+
+                it('adds max rating quality', function() {
+                    element.scope().addQuality('focusedConcentration');
+                    expect(element.scope().character.quality.focusedConcentration).toBeDefined();
+                    expect(element.scope().character.quality.focusedConcentration.maxRating).toBe(6);
+                })
+
+                it('does not copy quality description', function() {
+                    element.scope().addQuality('catlike');
+                    expect(element.scope().character.quality.catlike).toBeDefined();
+                    expect(element.scope().character.quality.catlike.short).toBeUndefined();
+                    expect(element.scope().character.quality.catlike.description).toBeUndefined();
+                })
+
+            })
+
+            describe('removeQuality', function() {
+
+                it('removes quality by key name', function() {
+                    element.scope().character.quality = { catlike: { name: 'Catlike' } };
+                    element.scope().removeQuality('catlike');
+                    expect(element.scope().character.quality.catlike).toBeUndefined();
+                })
+            })
+
+            describe('characterHasQuality', function() {
+
+                it('returns true when character has quality', function() {
+                    element.scope().character.quality = { catlike: { name: 'Catlike' } };
+                    expect(element.scope().characterHasQuality('catlike')).toBeTruthy();
+                })
+
+                it('returns false when character does not have quality', function() {
+                    expect(element.scope().characterHasQuality('guts')).toBeFalsy();
+                })
+            })
+
+            describe('positiveQualities', function() {
+
+                it('returns only qualities with positive karma', function() {
+                    var qualities = element.scope().positiveQualities();
+                    expect(Object.keys(qualities).length).toBeGreaterThan(0);
+                    for (var i in qualities) {
+                        expect(qualities[i].karma).toBeGreaterThan(-1);
+                    }
+                })
+            })
+
+            describe('negativeQualities', function() {
+
+                it('returns only qualities with positive karma', function() {
+                    var qualities = element.scope().negativeQualities();
+                    expect(Object.keys(qualities).length).toBeGreaterThan(0);
+                    for (var i in qualities) {
+                        expect(qualities[i].karma).toBeLessThan(0);
+                    }
+                })
+            })
+
+        })
+
+    })
+
+    describe('directive vatQualityRatingAdjuster', function() {
+
+        var element;
+
+        beforeEach(inject(function($compile, $rootScope, $httpBackend) {
+            $httpBackend.whenGET('character/qualityRatingAdjuster.html').respond('<div>Test</div>');
+            $rootScope.quality = { name: 'Guts', rating: 1 };
+            element = angular.element('<div data-vat-quality-rating-adjuster="quality"></div>');
+
+            $compile(element)($rootScope);
+            $httpBackend.flush();
+        }))
+
+        it('should load template', function() {
+            expect(element.find('div').text()).toBe('Test');
+        })
+
+        it('should set isolate scope', function() {
+            expect(element.scope().quality).toBeDefined();
+            expect(element.scope().quality.name).toBe('Guts');
+        })
+
+        describe('controller functions', function() {
+
+            beforeEach(inject(function($rootScope, $controller) {
+                element.scope().quality = { name: 'focusedConcentration',  karma: 4, rating: 1, maxRating: 6 }
+            }));
+
+            describe('increaseRating', function() {
+
+                it('increases rating by one point', function() {
+                    element.scope().increaseRating();
+                    expect(element.scope().quality.rating).toBe(2);
+                    element.scope().increaseRating();
+                    expect(element.scope().quality.rating).toBe(3);
+                })
+
+                it('does increase rating beyond maxRating value', function() {
+                    element.scope().quality.rating = 6;
+                    element.scope().increaseRating();
+                    expect(element.scope().quality.rating).toBe(6);
+                })
+
+                it('does not increase rating for quality with undefined maxRating', function() {
+                    element.scope().quality.maxRating = undefined;
+                    element.scope().increaseRating();
+                    expect(element.scope().quality.rating).toBe(1);
+                })
+            })
+
+            describe('decreaseRating', function() {
+
+                it('decreases rating by one point', function() {
+                    element.scope().quality.rating = 3;
+                    element.scope().decreaseRating();
+                    expect(element.scope().quality.rating).toBe(2);
+                    element.scope().decreaseRating();
+                    expect(element.scope().quality.rating).toBe(1);
+                })
+
+                it('does not decrease rating below 1', function() {
+                    element.scope().decreaseRating();
+                    expect(element.scope().quality.rating).toBe(1);
+                })
+            })
+
+        })
     })
 });

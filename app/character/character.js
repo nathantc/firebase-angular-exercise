@@ -102,7 +102,7 @@
         }
     }]);
 
-    character.controller('CharactersListCtrl', ['$scope', 'AuthService', 'CharacterFbService',
+    character.controller('CharactersListController', ['$scope', 'AuthService', 'CharacterFbService',
         function($scope, authService, characterFbService)
     {
         $scope.data = {
@@ -110,7 +110,7 @@
         }
     }]);
 
-    character.controller('CharactersEditCtrl', ['$scope', '$routeParams', '$location', 'AuthService', 'CharacterFbService',
+    character.controller('CharactersEditController', ['$scope', '$routeParams', '$location', 'AuthService', 'CharacterFbService',
         function($scope, $routeParams, $location, authService, characterFbService)
     {
         $scope.data = {
@@ -206,56 +206,30 @@
         }
     })
 
-    character.directive('vatNewCharacter', function() {
+    character.directive('vatNewCharacter', ['$location', 'AuthService', 'CharacterFbService',
+        function($location, authService, characterFbService) {
         return {
             scope: {},
-            controller: ['$scope', '$location', 'AuthService', 'CharacterFbService', function($scope, $location, authService, characterFbService) {
-                $scope.newCharacter = function() {
-                    var character = characterFbService.newCharacter();
-                    $location.path('characters/' + characterFbService.addUserCharacter(authService.currentUser().uid, character));
-                }
-            }],
             link: function($scope, element) {
                 element.bind("click", function() {
-                    $scope.newCharacter();
+                    var character = characterFbService.newCharacter();
+                    $location.path('characters/' + characterFbService.addUserCharacter(authService.currentUser().uid, character));
                 })
             }
         }
-    });
+    }]);
 
-    character.directive('vatCharacterPriority', function() {
+    character.directive('vatCharacterPriority', ['TablePriority', function(TablePriority) {
         return {
             templateUrl: 'character/priority-table.html',
             scope: {
                 priority: '=vatCharacterPriority'
             },
-            controller: ['$scope', 'TablePriority', function($scope, TablePriority) {
+            link: function($scope) {
                 $scope.priorityTable = TablePriority;
-            }]
-        }
-    });
-
-    character.controller('CharacterQualityCtrl', ['$scope', 'Qualities', function($scope, Qualities) {
-        $scope.qualities = Qualities;
-        $scope.qualityType = 1;
-
-        $scope.addQuality = function(key) {
-            $scope.character.quality = $scope.character.quality || {};
-            $scope.character.quality[key] = {
-                name: Qualities[key].name,
-                karma: Qualities[key].karma
             }
         }
-
-        $scope.removeQuality = function(key) {
-            delete $scope.character.quality[key];
-        }
-
-        $scope.characterHasQuality = function(key) {
-            return validObjectPathName($scope.character, 'quality.' + key);
-        }
-
-    }])
+    }]);
 
     character.directive('vatCharacterQualities', function() {
         return {
@@ -263,7 +237,80 @@
             scope: {
                 character: '=vatCharacterQualities'
             },
-            controller: 'CharacterQualityCtrl'
+            controller: ['$scope', 'Qualities', function($scope, Qualities) {
+                $scope.qualities = Qualities;
+                $scope.qualityType = 'positive';
+
+                $scope.addQuality = function(key) {
+                    $scope.character.quality = $scope.character.quality || {};
+                    $scope.character.quality[key] = {
+                        name: Qualities[key].name,
+                        karma: Qualities[key].karma,
+                        rating: 1,
+                        maxRating: Qualities[key].maxRating
+                    }
+                }
+
+                $scope.removeQuality = function(key) {
+                    delete $scope.character.quality[key];
+                }
+
+                $scope.characterHasQuality = function(key) {
+                    return validObjectPathName($scope.character, 'quality.' + key);
+                }
+
+                function qualities(value) {
+                    var result = {}
+                    for (var key in $scope.qualities) {
+                        if ($scope.qualities[key].karma >= 0) {
+                            result[key] = $scope.qualities[key];
+                        }
+                    }
+                    return result;
+                }
+
+                $scope.positiveQualities = function() {
+                    var result = {}
+                    for (var key in $scope.qualities) {
+                        if ($scope.qualities[key].karma >= 0) {
+                            result[key] = $scope.qualities[key];
+                        }
+                    }
+                    return result;
+                }
+
+                $scope.negativeQualities = function() {
+                    var result = {}
+                    for (var key in $scope.qualities) {
+                        if ($scope.qualities[key].karma < 0) {
+                            result[key] = $scope.qualities[key];
+                        }
+                    }
+                    return result;
+                }
+            }]
+        }
+    })
+
+    character.directive('vatQualityRatingAdjuster', function() {
+        return {
+            templateUrl: 'character/qualityRatingAdjuster.html',
+            scope: {
+                quality: '=vatQualityRatingAdjuster'
+            },
+            controller: ['$scope', function($scope) {
+                $scope.increaseRating = function() {
+                    if (isDefined($scope.quality.maxRating) && $scope.quality.rating < $scope.quality.maxRating) {
+                        $scope.quality.rating++;
+                    }
+                }
+
+                $scope.decreaseRating = function() {
+                    if ($scope.quality.rating > 1) {
+                        $scope.quality.rating--;
+                    }
+                }
+            }]
         }
     })
 

@@ -4,6 +4,7 @@
             <th></th>
             <th>Quality</th>
             <th>Karma</th>
+            <th>Rating</th>
         </tr>
     </thead>
     <tbody>
@@ -13,24 +14,29 @@
             </td>
             <td>{{ qvalue.name }}</td>
             <td>{{ qvalue.karma }}</td>
+            <td>
+                <input type="number" data-ng-show="qvalue.maxRating > 1" data-ng-model="qvalue.rating">
+            </td>
         </tr>
     </tbody>
 </table>
-<select data-ng-model="qualityType">
-    <option value="1">Positive</option>
-    <option value="-1">Negative</option>
-</select>
-<table>
-    <thead>
+<ul>
+    <li><a data-ng-click="qualityType == 'positive'">Positive</a></li>
+    <li><a data-ng-click="qualityType == 'negative'">Negative</a></li>
+</ul>
+        {{ qualityType }}
+<div data-ng-show="qualityType == 'positive'">
+    <table>
+        <thead>
         <tr>
             <th></th>
             <th>Quality</th>
             <th>Karma</th>
             <th>Max Rating</th>
         </tr>
-    </thead>
-    <tbody>
-        <tr data-ng-repeat="(qkey, qvalue) in qualities | positiveQuality:qualityType">
+        </thead>
+        <tbody>
+        <tr data-ng-repeat="(qkey, qvalue) in qualities | positiveQualities">
             <td>
                 <button data-ng-click="addQuality(qkey)"
                         data-ng-show="!characterHasQuality(qkey)">+</button>
@@ -40,5 +46,29 @@
             <td>{{ qvalue.maxRating }}</td>
             <td>{{ qvalue.short }}</td>
         </tr>
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
+<div data-ng-show="qualityType == 'negative'">
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th>Quality</th>
+            <th>Karma</th>
+            <th>Max Rating</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr data-ng-repeat="(qkey, qvalue) in qualities | negativeQualities">
+            <td>
+                <button data-ng-click="addQuality(qkey)" data-ng-show="!characterHasQuality(qkey)">+</button>
+            </td>
+            <td>{{ qvalue.name }}</td>
+            <td>{{ qvalue.karma }}</td>
+            <td>{{ qvalue.maxRating }}</td>
+            <td>{{ qvalue.short }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

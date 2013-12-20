@@ -42,7 +42,7 @@
         return auth;
     }]);
 
-    auth.controller('LoginCtrl', ['$scope', 'angularFireAuth',
+    auth.controller('LoginController', ['$scope', 'angularFireAuth',
         function($scope, angularFireAuth) {
             $scope.options = [
                     { name: 'Facebook', key: 'facebook' },

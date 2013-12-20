@@ -148,7 +148,7 @@ describe('AuthModule', function() {
 
     })
 
-    describe('LoginCtrl', function() {
+    describe('LoginController', function() {
 
         var _scope, _angularFireAuth;
 
@@ -157,7 +157,7 @@ describe('AuthModule', function() {
             _angularFireAuth = angularFireAuth;
             spyOn(angularFireAuth, 'login');
 
-            $controller('LoginCtrl', {$scope: _scope});
+            $controller('LoginController', {$scope: _scope});
         }));
 
         it('sets login options to scope', function() {
